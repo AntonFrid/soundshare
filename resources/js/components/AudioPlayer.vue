@@ -85,6 +85,7 @@
             },
             onEnd() {
                 this.playBool = false;
+                clearInterval(this.intervalID);
             },
             secondsToMinutesAndSeconds(time) {
                 let minutes = Math.floor(time / 60);

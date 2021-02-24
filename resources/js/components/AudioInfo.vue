@@ -89,6 +89,7 @@
         watch: {
             audioData: function(newVal, oldVal) {
                 this.copyBool = false;
+                this.url      = window.location.href;
             },
         }
     }

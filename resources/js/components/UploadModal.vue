@@ -209,6 +209,7 @@
     .UploadModal__buttons {
         display: flex;
         margin-left: calc(100% - 204px);
+        flex-wrap: wrap;
     }
 
     .UploadModal__buttons__uploadButton {
@@ -245,6 +246,28 @@
         cursor: pointer;
     }
 
+    @media screen and (max-width: 578px) {
+        .UploadModal__container {
+            width: 90%;
+            height: 70%;
+            max-width: none;
+        }
+
+        .UploadModal__buttons {
+            width: 100%;
+            margin: 0;
+        }
+
+        .UploadModal__buttons button {
+            width: 100%;
+            margin: 0;
+        }
+
+        .UploadModal__buttons__uploadButton {
+            margin-top: 12px !important;
+        }
+    }
+
     .UploadModal__title {
         width: 100%;
         height: 40px;
@@ -277,6 +300,7 @@
         font-size: 16px;
         color: rgba(255,255,255,0.5);
         border: solid 2px rgba(255, 255, 255, 0.0);
+        resize: none;
     }
 
     .UploadModal__desc:hover {

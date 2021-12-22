@@ -2,12 +2,14 @@
     <div class="Header container-fluid disable-select">
         <Logo v-bind:authUser="authUser"/>
         <div v-if="authUser" class="Header__right">
-            <button @click="onUpload" class="Header__uploadButton Header__right__icon">Upload</button>
-            <span @click="onRandom" class="material-icons-round md-34 white Header__right__icon">
-                repeat
-            </span>
-            <Volume class="Header__right__icon"/>
-            <Notification class="Header__right__icon"/>
+            <template v-if="window_width >= 578">
+                <button @click="onUpload" class="Header__uploadButton Header__right__icon">Upload</button>
+                <span @click="onRandom" class="material-icons-round md-34 white Header__right__icon">
+                    repeat
+                </span>
+                <Volume class="Header__right__icon"/>
+                <Notification class="Header__right__icon"/>
+            </template>
             <div ref="dropRef" @click="switchDropdown" class="Header__right__inner">
                 <p class="Header__right__icon no-pointer">{{ authUser.name }}</p>
                 <img class="Header__right__img no-pointer" :src="authUser.img_url" >
@@ -34,12 +36,14 @@
         },
         props: [
             'onUpload',
+            'onRandom',
             'authUser',
+            'window_width'
         ],
         data() {
             return {
                 userData: {},
-                showDropdown: false,
+                showDropdown: false
             }
         },
         methods: {
@@ -51,12 +55,6 @@
                     this.$router.push('/login');
                 });
             },
-            onRandom() {
-                axios.get('/api/file/random/audio/' + this.$route.params.uuid)
-                    .then(res => {
-                        this.$router.push('/player/' + res.data);
-                    });
-            },
             switchDropdown() {
                 if(this.showDropdown) {
                     this.showDropdown = false;
@@ -64,7 +62,7 @@
                     this.showDropdown = true;
                 }
             }
-        },
+        }
     }
 </script>
 

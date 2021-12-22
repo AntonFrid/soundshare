@@ -167,6 +167,7 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 25px;
+        flex-wrap: wrap;
     }
 
     .AudioInfo__container__bottom label {
@@ -176,6 +177,7 @@
         line-height: 33px;
         font-weight: 300;
         color: rgba(255, 255, 255, 0.3);
+        white-space: nowrap;
     }
 
     .AudioInfo__container__bottom__link {
@@ -218,6 +220,17 @@
     .AudioInfo__container__bottom__download:hover {
         box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
         cursor: pointer;
+    }
+
+    @media screen and (max-width: 578px) {
+        .AudioInfo__container__bottom__download {
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        .AudioInfo__container__bottom a {
+            width: 100%;
+        }
     }
 
     .copied {

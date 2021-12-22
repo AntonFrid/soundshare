@@ -82,6 +82,14 @@
         padding-right: 20px;
     }
 
+    @media screen and (max-width: 578px){
+        .Volume__slider__container {
+            top: -91px;
+            height: 50px;
+            box-shadow: 2px 2px 2px rgb(9 12 35 / 5%);
+        }
+    }
+
     .material-icons-round.md-40 { font-size: 40px; }
     .material-icons-round.white { color: white; opacity: 0.7;}
     .material-icons-round.white:hover { opacity: 0.8; cursor: pointer; }

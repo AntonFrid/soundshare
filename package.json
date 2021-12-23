@@ -31,6 +31,6 @@
         "vue": "^2.6.12",
         "vue-debounce": "^2.6.0",
         "vue-router": "^3.4.9",
-        "wavesurfer.js": "^4.4.0"
+        "wavesurfer.js": "^5.2.0"
     }
 }

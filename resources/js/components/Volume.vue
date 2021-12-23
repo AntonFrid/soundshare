@@ -12,14 +12,17 @@
         <span @mouseover="sliderBool = true" v-else @click="toggleMute" class="material-icons-round md-40 white">
             volume_down
         </span>
-        <div v-if="sliderBool" @mouseover="sliderBool = true" @mouseleave="sliderBool = false" class="Volume__slider__container">
+        <div v-if="sliderBool && !hide_range" @mouseover="sliderBool = true" @mouseleave="sliderBool = false" class="Volume__slider__container">
             <input type="range" id="slider" name="volume" min="0" max="10" step="1" v-model="volume" @input="updateVolume">
         </div>
     </div>
-</template>
+</template>opacity: 0.5;
 
 <script>
     export default {
+        props: [
+          'hide_range'
+        ],
         data() {
             return {
                 sliderBool: false,

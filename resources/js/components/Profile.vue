@@ -4,12 +4,15 @@
             <div class="Profile__header__inner">
                 <div class="Profile__header__inner__img__container">
                     <img class="Profile__header__inner__img" :src="userData.img_url">
-                    <label @click="showUpload = !showUpload;" v-if="userData.id === authUser.id">
-                        <span class="material-icons-round md-32">
-                            camera_alt
-                        </span>
-                        Change photo
-                    </label>
+                    <template v-if="authUser">
+                        <label @click="showUpload = !showUpload;" v-if="userData.id === authUser.id">
+                            <span class="material-icons-round md-32">
+                                camera_alt
+                            </span>
+                            Change photo
+                        </label>
+                    </template>
+
                     <my-upload
                         field="file"
                         @crop-success="cropSuccess"
@@ -39,7 +42,7 @@
                 v-bind:isFavorites="false"
                 v-bind:volume="volume"
                 v-bind:audioData="audioData"
-                v-bind:user_id="authUser.id"
+                v-bind:user_id="(authUser) ? authUser.id : null"
                 v-for="audioData in AudioDataArr"
                 :key="audioData.id"
             />

@@ -15,16 +15,18 @@ class AudioController extends Controller
 {
     public function getAudioFile(Request $request, $uuid = null) {
         $file_data  = Audio::loadData()->where('uuid', $uuid)->firstOrFail();
-        $user_id    = $request->user()->id;
+        $user_id    = $request->user()->id ?? null;
         $audio_id   = $file_data->id;
 
-        $favorite_boolean = Favorite::where('user_id', $user_id)
-            ->where('audio_id', $audio_id)
-            ->exists();
+        if(isset($user_id) && !empty($user_id)) {
+            $favorite_boolean = Favorite::where('user_id', $user_id)
+                ->where('audio_id', $audio_id)
+                ->exists();
+        }
 
         return response([
             'file_data' => $file_data,
-            'favorite_boolean' => $favorite_boolean
+            'favorite_boolean' => $favorite_boolean ?? false
         ]);
     }
 
@@ -38,12 +40,14 @@ class AudioController extends Controller
         $user            = User::where('uuid', $user_uuid)->first();
         $user_id         = $user->id;
         $file_data_array = Audio::where('user_id', $user_id)->with('user')->get();
-        $request_user_id = $request->user()->id;
+        $request_user_id = $request->user()->id ?? null;
 
-        foreach ($file_data_array as $file_data) {
-            $file_data->favorite_boolean = Favorite::where('user_id', $request_user_id)
-                ->where('audio_id', $file_data->id)
-                ->exists();
+        if(isset($request_user_id) && !empty($request_user_id)) {
+            foreach ($file_data_array as $file_data) {
+                $file_data->favorite_boolean = Favorite::where('user_id', $request_user_id)
+                    ->where('audio_id', $file_data->id)
+                    ->exists();
+            }
         }
 
         return response($file_data_array);

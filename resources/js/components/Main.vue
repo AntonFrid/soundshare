@@ -1,5 +1,5 @@
 <template>
-    <div class="Main">
+    <div class="Main" :class="authUser ? 'Main__container__auth' : ''">
         <Header
             @update-authUser="updateAuthUser"
             v-bind:authUser="authUser"
@@ -13,7 +13,7 @@
             <router-view v-bind:authUser="authUser" @update-authUser="updateAuthUser" v-bind:volume="volume"></router-view>
         </div>
         <BottomMenu
-            v-if="window_width < 578"
+            v-if="window_width < 578 && authUser"
             :onUpload="onUpload"
             :onRandom="onRandom"
             @volume="setVolume"
@@ -68,9 +68,9 @@
             }
         },
         mounted() {
-            if(window.authUser === null) {
-                this.$router.push('/login');
-            }
+            // if(window.authUser === null) {
+            //     this.$router.push('/login');
+            // }
 
             this.$nextTick(() => {
                 window.addEventListener('resize', this.onResize);
@@ -101,9 +101,9 @@
     }
 
     @media screen and (max-width: 578px) {
-        .Main__container {
+        .Main__container__auth {
             margin-bottom: 50px;
         }
     }
-    
+
 </style>

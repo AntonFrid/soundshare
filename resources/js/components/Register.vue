@@ -58,7 +58,6 @@
 
                 if(this.password !== this.password_confirmation) {
                     this.errorPassword = true;
-
                     return
                 }
 
@@ -272,5 +271,15 @@
 
     .Register__container__button:hover {
         box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
+    }
+
+    @media screen and (max-width: 578px) {
+        .Register__left {
+            display: none;
+        }
+
+        .Register__right {
+            width: 100%;
+        }
     }
 </style>

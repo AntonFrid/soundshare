@@ -16,6 +16,11 @@
             </div>
             <Dropdown v-bind:authUser="authUser" @close-self="switchDropdown" v-bind:parentRef="$refs.dropRef" v-bind:logout="logout" v-if="showDropdown"/>
         </div>
+        <button
+            v-if="!authUser && !is_login && !is_register"
+            class="Header__uploadButton Header__right__icon"
+            @click="loginClick"
+        >Login</button>
     </div>
 </template>
 
@@ -43,7 +48,9 @@
         data() {
             return {
                 userData: {},
-                showDropdown: false
+                showDropdown: false,
+                is_login: (this.$router.currentRoute.path == '/login'),
+                is_register: (this.$router.currentRoute.path == '/register')
             }
         },
         methods: {
@@ -60,6 +67,24 @@
                     this.showDropdown = false;
                 } else {
                     this.showDropdown = true;
+                }
+            },
+            loginClick() {
+                this.$router.push('/login');
+            }
+        },
+        watch:{
+            $route(to, from) {
+                if(to.path == '/login') {
+                    this.is_login = true;
+                } else if (from.path == '/login') {
+                    this.is_login = false;
+                }
+
+                if(to.path == '/register') {
+                    this.is_register = true;
+                } else if (from.path == '/register') {
+                    this.is_register = false;
                 }
             }
         }

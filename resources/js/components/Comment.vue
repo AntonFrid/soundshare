@@ -1,10 +1,13 @@
 <template lang="html">
     <div class="Comment">
-        <input @keypress="onInputKey" placeholder="Write a comment.." @click="onInputClick" ref="input" type="text" v-model="message">
-        <div class="Comment__submit">
-            <button v-if="inputBool" @click="onCancel" class="Comment__submit__cancle">Cancel</button>
-            <button v-if="inputBool" @click="postComment" class="Comment__submit__btn">Submit</button>
-        </div>
+        <template v-if="authUser">
+            <input @keypress="onInputKey" placeholder="Write a comment.." @click="onInputClick" ref="input" type="text" v-model="message">
+            <div class="Comment__submit">
+                <button v-if="inputBool" @click="onCancel" class="Comment__submit__cancle">Cancel</button>
+                <button v-if="inputBool" @click="postComment" class="Comment__submit__btn">Submit</button>
+            </div>
+        </template>
+
         <div v-if="commentsArr.length < 1" class="Comment__display">
             <p>No comments yet.</p>
         </div>
@@ -13,7 +16,7 @@
                 <div class="Comment__display__top__user">
                     <img @click="() => { $router.push(`/profile/${ comment.user.uuid }`) }" class="Comment__display__top__user__img" :src="comment.user.img_url" >
                     <p @click="() => { $router.push(`/profile/${ comment.user.uuid }`) }" >{{ comment.user.name }}</p>
-                    <button @click="onDelete(comment.id)" v-if="comment.user.id === authUser.id" class="Comment__display__top__user__delete">Delete</button>
+                    <button @click="onDelete(comment.id)" v-if="authUser && comment.user.id === authUser.id" class="Comment__display__top__user__delete">Delete</button>
                 </div>
                 <p>{{ new Date(comment.created_at).toDateString() }}</p>
             </div>

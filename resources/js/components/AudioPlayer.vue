@@ -9,7 +9,7 @@
                 ></div>
             </div>
             <p v-if="audioData.title" class="AudioPlayer__time">{{ audioTime }}</p>
-            <div v-if="audioData.title">
+            <div v-if="audioData.title && authUser">
                 <span v-if="!favoriteBool" @click="onFavorite" class="material-icons-round md-36 white">
                     favorite_border
                 </span>

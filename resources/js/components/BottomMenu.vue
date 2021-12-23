@@ -7,7 +7,7 @@
             <span @click="onRandom" class="material-icons-round md-34 white BottomMenu__icon">
                 repeat
             </span>
-            <Volume class="BottomMenu__icon"/>
+            <Volume :hide_range="true" class="BottomMenu__icon"/>
             <Notification class="BottomMenu__icon"/>
         </div>
     </div>

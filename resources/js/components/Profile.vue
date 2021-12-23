@@ -4,13 +4,26 @@
             <div class="Profile__header__inner">
                 <div class="Profile__header__inner__img__container">
                     <img class="Profile__header__inner__img" :src="userData.img_url">
-                    <label for="file-input" v-if="userData.id === authUser.id">
+                    <label @click="showUpload = !showUpload;" v-if="userData.id === authUser.id">
                         <span class="material-icons-round md-32">
                             camera_alt
                         </span>
                         Change photo
                     </label>
-                    <input type="file" id="file-input" accept=".png, .jpg, .jpeg" @change="onFileSelect">
+                    <my-upload
+                        field="file"
+                        @crop-success="cropSuccess"
+                        @crop-upload-success="cropUploadSuccess"
+                        @crop-upload-fail="cropUploadFail"
+                        v-model="showUpload"
+                        :width="300"
+                        :height="300"
+                        url="/api/user/image"
+                        img-format="jpg"
+                        langType="en"
+                        :noCircle="true"
+                        :headers="headers"
+                    ></my-upload>
                 </div>
                 <div class="Profile__header__inner__info">
                     <h1>{{ userData.name }}</h1>
@@ -37,11 +50,13 @@
 <script>
     import axios from 'axios';
 
+    import myUpload from 'vue-image-crop-upload/upload-2.vue';
     import AudioPlayerMini from './AudioPlayerMini.vue';
 
     export default {
         components: {
             AudioPlayerMini,
+            myUpload
         },
         props: [
             'authUser',
@@ -51,6 +66,11 @@
             return {
                 userData: {},
                 AudioDataArr: [],
+                showUpload: false,
+                imgDataUrl: '',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
             }
         },
         methods: {
@@ -60,28 +80,39 @@
                         this.userData = res.data;
                     });
             },
-            onFileSelect(e) {
-                let postParams = new FormData();
-                postParams.append('file', e.target.files[0]);
-
-                axios.post('/api/user/image', postParams)
-                    .then(res => {
-                        this.userData = res.data;
-
-                        this.getUserAudio();
-                        this.$emit('update-authUser', res.data);
-                    });
-            },
             getUserAudio() {
                 axios.get(`/api/user/${ this.$route.params.uuid }/file/audio`)
                     .then(res => {
                         this.AudioDataArr = res.data;
                     });
+            },
+            cropSuccess(imgDataUrl, field){
+                this.imgDataUrl = imgDataUrl;
+            },
+            cropUploadSuccess(jsonData, field){
+                this.userData = jsonData;
+
+                this.getUserAudio();
+                this.$emit('update-authUser', jsonData);
+
+                $('.vicp-close').trigger('click');
+            },
+            cropUploadFail(status, field){
+                console.log('-------- upload fail --------');
+                console.log(status);
+                console.log('field: ' + field);
             }
         },
         mounted() {
             this.getUserData();
             this.getUserAudio();
+
+            let vm = this;
+
+            $('.vue-image-crop-upload').on('click', function(event) {
+                if(this !== event.target) return;
+                vm.showUpload = false;
+            });
         },
         watch: {
             $route(to, from) {
@@ -205,4 +236,142 @@
     }
 
     .material-icons-round.md-32 { font-size: 32px;}
+</style>
+
+<style>
+    .vue-image-crop-upload .vicp-wrap {
+        background-color: #2D2D2D;
+        border-radius: 5px;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step1 .vicp-drop-area {
+        background-color: #252525;
+        border-radius: 5px;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step1 .vicp-drop-area .vicp-icon1 .vicp-icon1-arrow {
+        border-bottom: 14.7px solid #FFB74C;
+        opacity: 0.8;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step1 .vicp-drop-area .vicp-icon1 .vicp-icon1-body {
+        background-color: #FFB74C;
+        opacity: 0.8;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step1 .vicp-drop-area .vicp-icon1 .vicp-icon1-bottom {
+        border: 6px solid #FFB74C;
+        opacity: 0.8;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-operate a {
+        background-color: transparent;
+        width: 96px;
+        height: 32px;
+        border: 2px solid rgba(255, 255, 255, 0.05);
+        box-sizing: border-box;
+        border-radius: 18px;
+        color: rgba(255, 255, 255, 0.3);
+        outline: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-operate a:hover {
+        border: 2px solid rgba(255, 76, 76, 0.15);
+        color: rgba(255, 76, 76, 0.45);
+        cursor: pointer;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-operate .vicp-operate-btn {
+        background-color: #FFB74C;
+        opacity: 1;
+        color: white;
+        border: none;
+        outline: none;
+        height: 32px;
+        width: 96px;
+        border-radius: 18px;
+        margin-left: 12px;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-operate .vicp-operate-btn:hover {
+        box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
+        cursor: pointer;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step3 {
+        display: none;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-close {
+        opacity: 0;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop .vicp-crop-right .vicp-preview .vicp-preview-item {
+        border: none;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop .vicp-crop-right .vicp-preview .vicp-preview-item img {
+        border-radius: 12.5px;
+        padding: 0;
+        border: none;
+        background-color: transparent;
+    }
+
+    .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop .vicp-crop-left .vicp-img-container {
+        border-radius: 12.5px;
+    }
+
+    @media screen and (max-width: 578px) {
+        .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop {
+            display: flex;
+            justify-content: space-around;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .vue-image-crop-upload .vicp-wrap {
+            width: 90%;
+            height: 70%;
+        }
+
+        .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop .vicp-crop-right {
+            margin-top: 20px;
+        }
+
+        .vue-image-crop-upload .vicp-wrap .vicp-operate {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            position: static;
+        }
+
+        .vue-image-crop-upload .vicp-wrap .vicp-operate a {
+            width: 100% !important;
+            margin-bottom: 12px;
+            margin-left: 0 !important;
+        }
+
+        .vue-image-crop-upload .vicp-wrap .vicp-step2 {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .vue-image-crop-upload .vicp-wrap .vicp-step1 {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+    }
+
+    @media screen and (max-height: 750px) {
+        .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop .vicp-crop-right .vicp-preview {
+            display: none;
+        }
+    }
 </style>

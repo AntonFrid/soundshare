@@ -30,6 +30,7 @@
         "material-design-icons": "^3.0.1",
         "vue": "^2.6.12",
         "vue-debounce": "^2.6.0",
+        "vue-image-crop-upload": "^3.0.3",
         "vue-router": "^3.4.9",
         "wavesurfer.js": "^4.4.0"
     }

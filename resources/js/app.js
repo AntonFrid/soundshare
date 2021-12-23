@@ -17,9 +17,6 @@ import Profile from './components/Profile.vue';
 import Favorites from './components/Favorites.vue';
 import PageNotFound from './components/PageNotFound.vue';
 
-
-
-
 require("./bootstrap");
 window.Vue = require("vue");
 Vue.use(VueRouter);

@@ -6,7 +6,9 @@
                 <img class="AudioPlayerMini__top__left__img" :src="audioData.user.img_url">
                 <p class="AudioPlayerMini__top__left__user">{{ audioData.user.name }}</p>
             </div>
-            <p>{{ new Date(audioData.created_at).toDateString() }}</p>
+            <p
+                :title="new Date(audioData.created_at).toDateString()"
+            >{{ timeSince(audioData.created_at) }}</p>
         </div>
         <div class="AudioPlayerMini__mid">
             <p>{{ timeFormated }}</p>
@@ -20,11 +22,11 @@
                 <svg v-if="!playBool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="55px" height="55px"><path d="M8 6.82v10.36c0 .79.87 1.27 1.54.84l8.14-5.18c.62-.39.62-1.29 0-1.69L9.54 5.98C8.87 5.55 8 6.03 8 6.82z"/></svg>
                 <svg v-if="playBool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="42.5px" height="42.5px"><path d="M8 19c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2v10c0 1.1.9 2 2 2zm6-12v10c0 1.1.9 2 2 2s2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2z"/></svg>
             </button>
-            <span v-if="user_id">
-                <span v-if="!favoriteBool" @click="onFavorite" class="material-icons-round md-30 white">
+            <span v-if="user_id || isFavorites">
+                <span style="margin-top: 8px;" v-if="!favoriteBool" @click="onFavorite" class="material-icons-round md-30 white">
                     favorite_border
                 </span>
-                <span v-else @click="onFavorite" class="material-icons-round md-30 white">
+                <span style="margin-top: 8px;" v-else @click="onFavorite" class="material-icons-round md-30 white">
                     favorite
                 </span>
             </span>
@@ -35,7 +37,10 @@
         <div class="AudioPlayerMini__bot">
             <div class="AudioPlayerMini__bot__title">
                 <p @click="() => { $router.push(`/player/${ audioData.uuid }`) }">{{ audioData.title }}</p>
-                <button v-if="!isFavorites && user_id === audioData.user_id" @click="onDelete(audioData.id)" class="AudioPlayerMini__bot__title__delete">Delete</button>
+                <span class="AudioPlayerMini__bot__title__private" v-if="audioData.private == 1">
+                    <span class="material-icons-outlined white md-22">key</span>
+                    <span class="AudioPlayerMini__bot__title__private__label">Private</span>
+                </span>
             </div>
             <div class="AudioPlayerMini__bot__data">
                 <span class="material-icons-round red md-24">
@@ -48,6 +53,8 @@
                 <p>{{ audioData.streams.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</p>
             </div>
         </div>
+
+        <button v-if="!isFavorites && user_id === audioData.user_id" @click="onDelete(audioData.id)" class="AudioPlayerMini__delete">Delete</button>
     </div>
 </template>
 
@@ -110,8 +117,11 @@
                 clearInterval(this.intervalID);
             },
             updateTime(e) {
-                let percent = (e.offsetX / e.srcElement.clientWidth);
-                let time    = Math.floor(percent * this.$refs['player' + this.audioData.uuid].duration);
+                let bar_width   = $('.hp_slide').width();
+                let percent     = (e.offsetX / bar_width);
+                let time        = (percent * this.$refs['player' + this.audioData.uuid].duration).toFixed(2);
+
+                if (isNaN(this.$refs['player' + this.audioData.uuid].duration)) return;
 
                 this.$refs['player' + this.audioData.uuid].currentTime = time.toString();
             },
@@ -142,6 +152,31 @@
                         this.$emit('update-audioData');
                         this.$emit('update-userData');
                     });
+            },
+            timeSince(date) {
+                let seconds = Math.floor((new Date() - new Date(date)) / 1000);
+
+                let interval = Math.floor(seconds / 31536000);
+                if (interval > 1) return interval + " years ago";
+                if (interval == 1) return interval + " year ago";
+
+                interval = Math.floor(seconds / 2592000);
+                if (interval > 1) return interval + " months ago";
+                if (interval == 1) return interval + " month ago";
+
+                interval = Math.floor(seconds / 86400);
+                if (interval > 1) return interval + " days ago";
+                if (interval == 1) return interval + " day ago";
+
+                interval = Math.floor(seconds / 3600);
+                if (interval > 1) return interval + " hours ago";
+                if (interval == 1) return interval + " hour ago";
+
+                interval = Math.floor(seconds / 60);
+                if (interval > 1) return interval + " minutes ago";
+                if (interval == 1) return interval + " minute ago";
+
+                return "Just now";
             }
         },
         watch: {
@@ -168,6 +203,26 @@
         padding: 0px 10px 0px 10px;
         border-radius: 5px;
         margin-bottom: 25px;
+        position: relative;
+    }
+
+    .AudioPlayerMini__delete {
+        background-color: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.05);
+        box-sizing: border-box;
+        border-radius: 3px;
+        color: rgba(255, 255, 255, 0.3);
+        outline: none;
+        position: absolute;
+        right: 10px;
+        bottom: 18px;
+        font-size: 12px;
+    }
+
+    .AudioPlayerMini__delete:hover {
+        border: 2px solid rgba(255, 76, 76, 0.15);
+        color: rgba(255, 76, 76, 0.45);
+        cursor: pointer;
     }
 
     .AudioPlayerMini__top {
@@ -192,7 +247,7 @@
         width: 38px;
         object-fit: cover;
         border-radius: 5px;
-        background: #BEBEBE;
+        background: transparent;
         overflow: hidden;
     }
 
@@ -244,7 +299,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 15px;
+        margin-bottom: 14px;
     }
 
     .AudioPlayerMini__bot p {
@@ -252,6 +307,9 @@
         opacity: 0.7;
         margin-top: 0;
         margin-bottom: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .AudioPlayerMini__bot__title > p:hover {
@@ -261,23 +319,25 @@
     .AudioPlayerMini__bot__title {
         display: flex;
         align-items: center;
+        flex: 1;
+        min-width: 0;
     }
 
-    .AudioPlayerMini__bot__title__delete {
-        background-color: transparent;
-        border: 2px solid rgba(255, 255, 255, 0.05);
-        box-sizing: border-box;
-        border-radius: 3px;
-        color: rgba(255, 255, 255, 0.3);
-        outline: none;
-        margin-left: 12px;
+    .AudioPlayerMini__bot__title__private {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        margin-left: 10px;
+        margin-right: 10px;
+        opacity: 0.2;
+    }
+
+    .AudioPlayerMini__bot__title__private__label {
         font-size: 12px;
-    }
-
-    .AudioPlayerMini__bot__title__delete:hover {
-        border: 2px solid rgba(255, 76, 76, 0.15);
-        color: rgba(255, 76, 76, 0.45);
-        cursor: pointer;
+        margin-left: 3px;
+        color: white;
+        display: flex;
+        align-items: center;
     }
 
     .AudioPlayerMini__bot__data {
@@ -317,4 +377,7 @@
     .material-icons-round.orange { color: #FFB74C; }
     .material-icons-round.white { color: #B8B8B8; cursor: pointer; }
     .material-icons-round.white:hover { color: white; opacity: 0.8;}
+
+    .material-icons-outlined.md-22 { font-size: 24px; }
+    .material-icons-outlined.white { color: rgba(255, 255, 255, 0.8); }
 </style>

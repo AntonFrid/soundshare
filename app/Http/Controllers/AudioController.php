@@ -39,8 +39,18 @@ class AudioController extends Controller
     public function getAllUserAudioFiles(Request $request, $user_uuid = null) {
         $user            = User::where('uuid', $user_uuid)->first();
         $user_id         = $user->id;
-        $file_data_array = Audio::where('user_id', $user_id)->with('user')->get();
         $request_user_id = $request->user()->id ?? null;
+        $fileQuery       = Audio::query();
+
+        $fileQuery->where('user_id', $user_id)
+            ->with('user')
+            ->orderBy('created_at', 'desc');
+
+        if($user_id != $request_user_id) {
+            $fileQuery->where('private', 0);
+        }
+
+        $file_data_array = $fileQuery->get();
 
         if(isset($request_user_id) && !empty($request_user_id)) {
             foreach ($file_data_array as $file_data) {
@@ -54,7 +64,10 @@ class AudioController extends Controller
     }
 
     public function getRandomAudioFile($curr_uuid = null) {
-        $file_data  = Audio::inRandomOrder()->whereNotIn('uuid', [$curr_uuid])->first();
+        $file_data  = Audio::inRandomOrder()
+            ->whereNotIn('uuid', [$curr_uuid])
+            ->where('private', 0)
+            ->first();
         $uuid       = $file_data->uuid;
 
         return response($uuid);
@@ -68,6 +81,8 @@ class AudioController extends Controller
         $user_id        = $request->user()->id;
         $title          = $request->title;
         $description    = $request->description ? $request->description : 'No description given.';
+        $private        = $request->private;
+        $download       = $request->download;
         $file           = $request->file('file');
         $file_name      = $file->hashName();
         $file_path      = $file_name;
@@ -79,8 +94,8 @@ class AudioController extends Controller
             'user_id'       => $user_id,
             'title'         => $title,
             'description'   => $description,
-            'private'       => 1,
-            'download'      => 0,
+            'private'       => ($private == 'true') ? 1 : 0,
+            'download'      => ($download == 'true') ? 1 : 0,
             'waveform_path' => null,
             'file_path'     => $file_path,
             'uuid'          => $uuid,

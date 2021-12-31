@@ -1,26 +1,34 @@
 <template>
     <div class="Header container-fluid disable-select">
         <Logo v-bind:authUser="authUser"/>
-        <div v-if="authUser" class="Header__right">
-            <template v-if="window_width >= 578">
-                <button @click="onUpload" class="Header__uploadButton Header__right__icon">Upload</button>
-                <span @click="onRandom" class="material-icons-round md-34 white Header__right__icon">
-                    repeat
-                </span>
-                <Volume class="Header__right__icon"/>
-                <Notification class="Header__right__icon"/>
+        <div class="Header__right">
+            <!-- If auth -->
+            <template v-if="authUser">
+                <template v-if="window_width >= 578">
+                    <button @click="onUpload" class="Header__uploadButton Header__right__icon">Upload</button>
+                    <span @click="onRandom" class="material-icons-round md-34 white Header__right__icon">
+                        repeat
+                    </span>
+                    <Volume class="Header__right__icon"/>
+                    <Notification class="Header__right__icon"/>
+                </template>
+                <div ref="dropRef" @click="switchDropdown" class="Header__right__inner">
+                    <p class="Header__right__icon no-pointer">{{ authUser.name }}</p>
+                    <img class="Header__right__img no-pointer" :src="authUser.img_url" >
+                </div>
+                <Dropdown v-bind:authUser="authUser" @close-self="switchDropdown" v-bind:parentRef="$refs.dropRef" v-bind:logout="logout" v-if="showDropdown"/>
             </template>
-            <div ref="dropRef" @click="switchDropdown" class="Header__right__inner">
-                <p class="Header__right__icon no-pointer">{{ authUser.name }}</p>
-                <img class="Header__right__img no-pointer" :src="authUser.img_url" >
-            </div>
-            <Dropdown v-bind:authUser="authUser" @close-self="switchDropdown" v-bind:parentRef="$refs.dropRef" v-bind:logout="logout" v-if="showDropdown"/>
+
+            <!-- If not auth -->
+            <template v-else>
+                <Volume v-if="window_width >= 578 && !is_login && !is_register" class="Header__right__icon"/>
+                <button
+                    v-if="!is_login && !is_register"
+                    class="Header__uploadButton Header__right__icon"
+                    @click="loginClick"
+                >Login</button>
+            </template>
         </div>
-        <button
-            v-if="!authUser && !is_login && !is_register"
-            class="Header__uploadButton Header__right__icon"
-            @click="loginClick"
-        >Login</button>
     </div>
 </template>
 
@@ -145,7 +153,7 @@
         width: 38px;
         object-fit: cover;
         border-radius: 5px;
-        background: #BEBEBE;
+        background: transparent;
         overflow: hidden;
     }
 

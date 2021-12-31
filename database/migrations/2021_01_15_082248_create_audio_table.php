@@ -20,7 +20,7 @@ class CreateAudioTable extends Migration
             $table->string('description')->default('');
             $table->integer('likes')->default(0);
             $table->integer('streams')->default(0);
-            $table->boolean('private')->default(true);
+            $table->boolean('private')->default(false);
             $table->boolean('download')->default(false);
             $table->string('waveform_path')->nullable();
             $table->string('file_path');

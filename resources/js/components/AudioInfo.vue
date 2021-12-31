@@ -1,6 +1,12 @@
 <template lang="html">
     <div v-if="audioData.user" class="AudioInfo">
-        <p>{{ audioData.title }}</p>
+        <p class="AudioInfo__title">
+            {{ audioData.title }}
+            <span class="AudioInfo__title__private" v-if="audioData.private == 1">
+                <span class="material-icons-outlined white md-24">key</span>
+                <span class="AudioInfo__title__private__label">Private</span>
+            </span>
+        </p>
         <div class="AudioInfo__container">
             <div v-if="audioData.user" class="AudioInfo__container__top">
                 <div @click="() => { $router.push(`/profile/${audioData.user.uuid}`)}" class="AudioInfo__container__top__user">
@@ -36,7 +42,7 @@
                         check
                     </span>
                 </label>
-                <a :href="audioData.file_url" :download="audioData.title">
+                <a v-if="audioData.download == 1" :href="audioData.file_url" :download="audioData.title">
                     <button class="AudioInfo__container__bottom__download">Download</button>
                 </a>
             </div>
@@ -113,6 +119,26 @@
         font-weight: 300;
     }
 
+    .AudioInfo__title {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .AudioInfo__title__private {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        margin-left: 20px;
+        opacity: 0.4;
+    }
+
+    .AudioInfo__title__private__label {
+        font-size: 14px;
+        margin-left: 5px;
+    }
+
     .AudioInfo__container {
         width: 95%;
         max-width: 900px;
@@ -156,7 +182,7 @@
         width: 65px;
         object-fit: cover;
         border-radius: 5px;
-        background: #BEBEBE;
+        background: transparent;
         overflow: hidden;
         margin-right: 20px;
     }
@@ -244,4 +270,7 @@
     .material-icons-round.red { color: #FF4C4C; }
     .material-icons-round.orange { color: #FFB74C; }
     .material-icons-round.white { margin-left: 5px; color: rgba(255, 255, 255, 0.3); }
+
+    .material-icons-outlined.md-24 { font-size: 25px; }
+    .material-icons-outlined.white { color: rgba(255, 255, 255, 0.8); }
 </style>

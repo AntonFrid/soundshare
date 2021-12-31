@@ -19,8 +19,8 @@
                         @crop-upload-success="cropUploadSuccess"
                         @crop-upload-fail="cropUploadFail"
                         v-model="showUpload"
-                        :width="300"
-                        :height="300"
+                        :width="200"
+                        :height="200"
                         url="/api/user/image"
                         img-format="jpg"
                         langType="en"
@@ -203,7 +203,7 @@
         width: 162.5px;
         object-fit: cover;
         border-radius: 12.5px;
-        background: #BEBEBE;
+        background: transparent;
         overflow: hidden;
     }
 
@@ -265,6 +265,7 @@
     .vue-image-crop-upload .vicp-wrap .vicp-step1 .vicp-drop-area .vicp-icon1 .vicp-icon1-bottom {
         border: 6px solid #FFB74C;
         opacity: 0.8;
+        border-top: none;
     }
 
     .vue-image-crop-upload .vicp-wrap .vicp-operate a {

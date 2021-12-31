@@ -1,24 +1,71 @@
 <template lang="html">
     <div v-if="showSelf" @mousedown="onOverlayClick" class="UploadModal">
         <div id="waveform" class="UploadModal__container">
-            <div class="UploadModal__container__header">
+            <!-- <div class="UploadModal__container__header">
                 <h2>Upload</h2>
-            </div>
+            </div> -->
             <div class="UploadModal__container__body">
                 <label for="">
                     <span>Title</span>
-                    <input @input="() => { errorTitle = false; }" class="UploadModal__title" type="text" name="title" v-model="title"/>
+                    <input
+                        @input="() => { errorTitle = false; }"
+                        class="UploadModal__title"
+                        type="text"
+                        name="title"
+                        v-model="title"
+                        :placeholder="title_placeholder"
+                    />
                     <p v-if="errorTitle">*Please enter a title.</p>
                 </label>
                 <label for="">
                     <span>Description</span>
                     <textarea class="UploadModal__desc" name="desc" v-model="desc"/>
                 </label>
-                <label>
-                    <input class="UploadModal__choose" type="file" name="file" accept=".mp3" @change="onFileSelect"/>
-                    <p class="UploadModal__choose__error" v-if="errorFile">*Please choose a file</p>
-                    <p class="UploadModal__choose__error" v-if="errorUpload">*Invalid file type, mp3 required (max size 20MB).</p>
-                </label>
+                <div style="width: 100%; position: relative;" @dragover.prevent @drop.prevent>
+                    <input style="display: none;" type="file" name="file" accept=".mp3" @change="onFileSelect"/>
+                    <div
+                        class="UploadModal__choose"
+                        @click="triggerFileUpload"
+                        @drop="onDragFile"
+                        @mouseover="is_hover_upload = true"
+                        @mouseleave="is_hover_upload = false"
+                    >
+                        <i v-show="!selectedFile" class="UploadModal__choose__icon">
+                            <i class="UploadModal__choose__icon__arrow"></i>
+                            <i class="UploadModal__choose__icon__body"></i>
+                            <i class="UploadModal__choose__icon__bottom"></i>
+                        </i>
+                        <span v-show="!selectedFile" class="UploadModal__choose__hint">Click or drag the file here to upload</span>
+
+                        <div v-show="selectedFile" class="UploadModal__choose__icon__done">
+                            <span class="material-icons md-60" :class="is_hover_upload ? 'red' : 'green'">
+                                {{ is_hover_upload ? 'delete_forever' : 'download_done' }}
+                            </span>
+                        </div>
+                        <span v-if="selectedFile" class="UploadModal__choose__hint" style="padding-top: 0px;">{{ selectedFile.name.substring(0, 100) }}{{ selectedFile.name.length > 100 ? '...' : ''}}</span>
+                    </div>
+                    <span class="UploadModal__choose__error" v-if="errorFile">*Please choose a file</span>
+                    <span class="UploadModal__choose__error" v-if="errorUpload">*Invalid file type, mp3 required (max size 20MB).</span>
+                </div>
+
+                <div class="UploadModal__switches">
+                    <span class="UploadModal__switch__wrapper">
+                        <label class="switch" for="checkbox_private">
+                            <input v-model="private" type="checkbox" id="checkbox_private"/>
+                            <div class="slider round"></div>
+                        </label>
+                        <div class="UploadModal__switch__label">Make Private</div>
+                    </span>
+
+                    <span class="UploadModal__switch__wrapper">
+                        <label class="switch" for="checkbox_download">
+                            <input v-model="download" type="checkbox" id="checkbox_download"/>
+                            <div class="slider round"></div>
+                        </label>
+                        <div class="UploadModal__switch__label">Enable Download</div>
+                    </span>
+                </div>
+
                 <div class="UploadModal__buttons">
                     <button @click="onCancel" class="UploadModal__buttons__cancle">Cancel</button>
                     <button class="UploadModal__buttons__uploadButton" @click="onUpload">Upload</button>
@@ -41,38 +88,75 @@
             return {
                 selectedFile: null,
                 title: "",
+                title_placeholder: "",
                 desc: "",
+                private: false,
+                download: false,
                 errorFile: false,
                 errorUpload: false,
                 errorTitle: false,
+                is_hover_upload: false
             }
         },
         methods: {
+            triggerFileUpload() {
+                $('input[name="file"]').trigger('click');
+            },
+            onDragFile(e) {
+                this.selectedFile       = null;
+                this.selectedFile       = e.dataTransfer.files[0];
+                this.errorFile          = false;
+                this.errorUpload        = false;
+                this.is_hover_upload    = false;
+
+                $('.material-icons.md-60').animate({opacity: 0}, 1);
+
+                setTimeout(function() {
+                    $('.material-icons.md-60').animate({opacity: 0.8}, 100);
+                }, 100);
+
+                this.title_placeholder = this.selectedFile.name.split('.')[0] || this.selectedFile.name;
+            },
             onFileSelect(e) {
-                this.selectedFile = e.target.files[0];
-                this.errorFile    = false;
-                this.errorUpload  = false;
+                this.selectedFile       = null;
+                this.selectedFile       = e.target.files[0];
+                this.errorFile          = false;
+                this.errorUpload        = false;
+                this.is_hover_upload    = false;
+
+                $('.material-icons.md-60').animate({opacity: 0}, 1);
+
+                setTimeout(function() {
+                    $('.material-icons.md-60').animate({opacity: 0.8}, 100);
+                }, 100);
+
+                this.title_placeholder = this.selectedFile.name.split('.')[0] || this.selectedFile.name;
             },
             onUpload() {
                 if(!this.selectedFile) {
                     this.errorFile = true;
                     return;
                 }
-                else if(this.title.replace(' ', '') === '') {
-                    this.errorTitle = true;
-                    return;
-                }
 
                 let postParams = new FormData();
+
                 postParams.append('file', this.selectedFile);
-                postParams.append('title', this.title);
                 postParams.append('description', this.desc);
+                postParams.append('private', this.private);
+                postParams.append('download', this.download);
+
+                if(this.title.replace(' ', '') === '') {
+                    postParams.append('title', this.title_placeholder);
+                } else {
+                    postParams.append('title', this.title);
+                }
 
                 axios.post('/api/file/audio', postParams)
                     .then(res => {
-                        this.title          = "";
-                        this.desc           = "";
-                        this.selectedFile   = null;
+                        this.title              = "";
+                        this.title_placeholder  = "";
+                        this.desc               = "";
+                        this.selectedFile       = null;
 
                         this.$router.push(`/player/${res.data.uuid}`)
 
@@ -85,22 +169,28 @@
             onOverlayClick(e) {
                 if(e.target !== e.currentTarget) return
 
-                this.title          = "";
-                this.desc           = "";
-                this.selectedFile   = null;
-                this.errorFile      = false;
-                this.errorUpload    = false;
-                this.errorTitle     = false;
+                this.title              = "";
+                this.title_placeholder  = "";
+                this.desc               = "";
+                this.selectedFile       = null;
+                this.errorFile          = false;
+                this.errorUpload        = false;
+                this.errorTitle         = false;
+                this.private            = false;
+                this.download           = false;
 
                 this.closeSelf();
             },
             onCancel() {
-                this.title          = "";
-                this.desc           = "";
-                this.selectedFile   = null;
-                this.errorFile      = false;
-                this.errorUpload    = false;
-                this.errorTitle     = false;
+                this.title              = "";
+                this.title_placeholder  = "";
+                this.desc               = "";
+                this.selectedFile       = null;
+                this.errorFile          = false;
+                this.errorUpload        = false;
+                this.errorTitle         = false;
+                this.private            = false;
+                this.download           = false;
 
                 this.closeSelf();
             }
@@ -135,7 +225,6 @@
     }
 
     .UploadModal__container {
-        height: 60%;
         width: 80%;
         max-width: 600px;
         background: #2D2D2D;
@@ -146,26 +235,20 @@
         animation-duration: 0.15s;
     }
 
-    .UploadModal__container__header {
+    /* .UploadModal__container__header {
         width: 100%;
         position: absolute;
         top: 0;
         text-align: center;
         background-color: #272727;
         color: #BEBEBE;
-    }
+    } */
 
     .UploadModal__container__body {
-        position: absolute;
-        bottom: 0;
         padding-left: 20px;
         padding-right: 20px;
+        padding-top: 20px;
         width: 100%;
-        height: 80%;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: space-around;
     }
 
     .UploadModal__container__body label {
@@ -174,6 +257,7 @@
         align-items: flex-start;
         width: 100%;
         position: relative;
+        margin-bottom: 20px;
     }
 
     .UploadModal__container__body label > span {
@@ -194,8 +278,9 @@
         color: rgba(255, 76, 76, 0.5);
         font-size: 14px;
         position: absolute;
-        bottom: -38px;
-        left: 0;
+        bottom: 5px;
+        text-align: center;
+        width: 100%;
     }
 
     .UploadModal__container__body > label > p {
@@ -222,6 +307,7 @@
         width: 96px;
         border-radius: 18px;
         margin-left: 12px;
+        margin-bottom: 20px;
     }
 
     .UploadModal__buttons__uploadButton:hover {
@@ -238,6 +324,7 @@
         border-radius: 18px;
         color: rgba(255, 255, 255, 0.3);
         outline: none;
+        margin-bottom: 20px;
     }
 
     .UploadModal__buttons__cancle:hover {
@@ -249,22 +336,17 @@
     @media screen and (max-width: 578px) {
         .UploadModal__container {
             width: 90%;
-            height: 70%;
             max-width: none;
         }
 
         .UploadModal__buttons {
             width: 100%;
-            margin: 0;
+            margin-left: 0;
         }
 
         .UploadModal__buttons button {
             width: 100%;
-            margin: 0;
-        }
-
-        .UploadModal__buttons__uploadButton {
-            margin-top: 12px !important;
+            margin-left: 0;
         }
     }
 
@@ -312,6 +394,137 @@
     }
 
     .UploadModal__choose {
-        color: #BEBEBE;
+        position: relative;
+        box-sizing: border-box;
+        padding: 35px;
+        min-height: 170px;
+        background-color: #252525;
+        text-align: center;
+        border: 1px dashed rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border-radius: 5px;
+        width: 100%;
+        margin-bottom: 20px;
     }
+
+    .UploadModal__choose:hover {
+        cursor: pointer;
+        border-color: rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .UploadModal__choose__hint {
+        display: block;
+        padding: 15px;
+        font-size: 14px;
+        color: #BEBEBE;
+        line-height: 20px;
+    }
+
+    .UploadModal__choose__icon {
+        display: block;
+        margin: 0 auto 6px;
+        width: 42px;
+        height: 42px;
+        overflow: hidden;
+    }
+
+    .UploadModal__choose__icon__arrow {
+        display: block;
+        margin: 0 auto;
+        width: 0;
+        height: 0;
+        border-bottom: 14.7px solid #FFB74C;
+        opacity: 0.8;
+        border-left: 14.7px solid transparent;
+        border-right: 14.7px solid transparent;
+    }
+
+    .UploadModal__choose__icon__body {
+        display: block;
+        width: 12.6px;
+        height: 14.7px;
+        margin: 0 auto;
+        background-color: #FFB74C;
+        opacity: 0.8;
+    }
+
+    .UploadModal__choose__icon__bottom {
+        box-sizing: border-box;
+        display: block;
+        height: 12.6px;
+        border: 6px solid #FFB74C;
+        opacity: 0.8;
+        border-top: none;
+    }
+
+    .UploadModal__choose__icon__done {
+        margin-top: -5px;
+    }
+
+    .UploadModal__switch__wrapper {
+        display: flex;
+        align-items: center;
+    }
+
+    .UploadModal__switch__label {
+        color: #BEBEBE;
+        margin-left: 12.5px;
+        white-space: nowrap;
+        margin-bottom: 20px;
+    }
+
+    /* Checkbox/switches */
+    .switch {
+        display: inline-block;
+        height: 32px;
+        position: relative;
+        width: 64px !important;
+    }
+
+    .switch input {
+        display:none;
+    }
+
+    .slider {
+        background-color: #ccc;
+        bottom: 0;
+        cursor: pointer;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: .4s;
+    }
+
+    .slider:before {
+        background-color: #fff;
+        bottom: 3px;
+        content: "";
+        height: 26px;
+        left: 3px;
+        position: absolute;
+        transition: .4s;
+        width: 26px;
+    }
+
+    input:checked + .slider {
+        background-color: #FFB74C;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(32px);
+    }
+
+    .slider.round {
+        border-radius: 32px;
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    .material-icons.md-60 { font-size: 60px; opacity: 0; }
+    .material-icons.green { color: #4BB543; }
+    .material-icons.red   { color: rgba(255, 76, 76, 0.5) ;}
 </style>

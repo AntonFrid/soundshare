@@ -2,7 +2,7 @@
     <div ref="dropdown" class="Dropdown">
         <button name="profile" @click="onClick">PROFILE</button>
         <button name="favorites" @click="onClick">FAVORITES</button>
-        <button name="logout" @click="onClick">LOG OUT</button>
+        <button class="Dropdown__logout" name="logout" @click="onClick">LOG OUT</button>
     </div>
 </template>
 
@@ -70,5 +70,9 @@
 
     .Dropdown button:hover {
         box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+    }
+
+    .Dropdown__logout {
+        color: rgba(255, 76, 76, 0.5) !important;
     }
 </style>

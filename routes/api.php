@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('file/audio/{id}', [AudioController::class, 'deleteAudioFile']);
     Route::post('file/audio', [AudioController::class, 'uploadAudioFile']);
     Route::get('file/random/audio/{curr_uuid}', [AudioController::class, 'getRandomAudioFile']);
+    Route::post('edit/audio/{id}', [AudioController::class, 'editAudioFile']);
 
     // Comments
     Route::post('audio/{audio_id}/comment', [CommentController::class, 'postComment']);

@@ -26,6 +26,7 @@
 
             </div>
             <p>{{ audioData.description }}</p>
+
             <div class="AudioInfo__container__bottom">
                 <label>Direct Link
                     <button
@@ -42,9 +43,18 @@
                         check
                     </span>
                 </label>
-                <a v-if="audioData.download == 1" :href="audioData.file_url" :download="audioData.title">
-                    <button class="AudioInfo__container__bottom__download">Download</button>
-                </a>
+
+                <div class="AudioInfo__container__bottom__wrapper">
+                    <button
+                        v-if="authUser && authUser.id === audioData.user_id"
+                        @click="$emit('on-edit')"
+                        class="AudioInfo__container__bottom__edit"
+                    >Edit</button>
+
+                    <a v-if="audioData.download == 1" :href="audioData.file_url" :download="audioData.title">
+                        <button class="AudioInfo__container__bottom__download">Download</button>
+                    </a>
+                </div>
             </div>
         </div>
         <Comment v-bind:authUser="authUser" v-if="audioData.id" v-bind:audio_id="audioData.id"/>
@@ -232,6 +242,28 @@
         cursor: pointer;
     }
 
+    .AudioInfo__container__bottom__wrapper {
+
+    }
+
+    .AudioInfo__container__bottom__edit {
+        background-color: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.05);
+        box-sizing: border-box;
+        width: 130px;
+        height: 38px;
+        border-radius: 5px;
+        color: rgba(255, 255, 255, 0.3);
+        outline: none;
+        font-size: 16px;
+    }
+
+    .AudioInfo__container__bottom__edit:hover {
+        border: 2px solid rgba(255, 183, 76, 0.30);
+        color: rgba(255, 183, 76, 0.90);
+        cursor: pointer;
+    }
+
     .AudioInfo__container__bottom__download {
         width: 130px;
         height: 38px;
@@ -241,6 +273,7 @@
         font-weight: 300;
         font-size: 18px;
         outline: none;
+        margin-left: 12px;
     }
 
     .AudioInfo__container__bottom__download:hover {
@@ -249,9 +282,19 @@
     }
 
     @media screen and (max-width: 578px) {
+        .AudioInfo__container__bottom__wrapper {
+            width: 100%;
+        }
+
+        .AudioInfo__container__bottom__edit {
+            margin-top: 25px;
+            width: 100%;
+        }
+
         .AudioInfo__container__bottom__download {
             margin-top: 25px;
             width: 100%;
+            margin-left: 0;
         }
 
         .AudioInfo__container__bottom a {

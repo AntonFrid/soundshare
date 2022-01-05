@@ -9,7 +9,16 @@ use App\Models\User;
 class UserController extends Controller
 {
     public function getUserByUuid($uuid = null) {
-        $user = User::where('uuid', $uuid)->first();
+        $user = User::where('uuid', $uuid)
+            ->withCount([
+                'audio as public_upload_count' => function($query) {
+                    $query->where('private', 0);
+                },
+                'audio as private_upload_count' => function($query) {
+                    $query->where('private', 1);
+                }
+            ])
+            ->first();
 
         return response($user);
     }

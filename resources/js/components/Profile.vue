@@ -1,5 +1,15 @@
 <template lang="html">
     <div class="Profile">
+        <EditModal
+            v-if="showEdit"
+            :audioData="editData"
+            :showSelf="showEdit"
+            :close-self="onEdit"
+            :isPlayer="false"
+            @update-audioData="getUserAudio"
+            @update-userData="getUserData"
+        />
+
         <div class="Profile__header">
             <div class="Profile__header__inner">
                 <div class="Profile__header__inner__img__container">
@@ -30,21 +40,28 @@
                 </div>
                 <div class="Profile__header__inner__info">
                     <h1>{{ userData.name }}</h1>
-                    <p class="Profile__header__inner__uploadAmount"><b>{{ userData.upload_amount }}</b> Uploads</p>
+                    <p v-if="authUser && userData.id == authUser.id" class="Profile__header__inner__uploadAmount">
+                        <b class="mr-2">{{ userData.public_upload_count }}</b>Public uploads
+                    </p>
+                    <p v-if="authUser && userData.id == authUser.id" class="Profile__header__inner__uploadAmount">
+                        <b class="mr-2">{{ userData.private_upload_count }}</b>Private uploads
+                    </p>
+                    <p v-else class="Profile__header__inner__uploadAmount">
+                        <b class="mr-2">{{ userData.public_upload_count }}</b>Uploads
+                    </p>
                 </div>
             </div>
         </div>
         <div class="Profile__body">
             <p style="color: rgba(255, 255, 255, 0.6); font-size: 24px;" v-if="userData.upload_amount < 1">No uploads yet.</p>
             <AudioPlayerMini
-                @update-audioData="getUserAudio"
-                @update-userData="getUserData"
                 v-bind:isFavorites="false"
                 v-bind:volume="volume"
                 v-bind:audioData="audioData"
                 v-bind:user_id="(authUser) ? authUser.id : null"
                 v-for="audioData in AudioDataArr"
                 :key="audioData.id"
+                :onEdit="onEdit"
             />
         </div>
     </div>
@@ -55,11 +72,13 @@
 
     import myUpload from 'vue-image-crop-upload/upload-2.vue';
     import AudioPlayerMini from './AudioPlayerMini.vue';
+    import EditModal from "./EditModal";
 
     export default {
         components: {
             AudioPlayerMini,
-            myUpload
+            myUpload,
+            EditModal
         },
         props: [
             'authUser',
@@ -73,7 +92,9 @@
                 imgDataUrl: '',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
+                },
+                showEdit: false,
+                editData: null,
             }
         },
         methods: {
@@ -104,6 +125,17 @@
                 console.log('-------- upload fail --------');
                 console.log(status);
                 console.log('field: ' + field);
+            },
+            onEdit(currentAudioData = null) {
+                if(!this.showEdit) {
+                    this.editData                   = currentAudioData;
+                    this.showEdit                   = true;
+                    document.body.style.overflowY   = "hidden";
+                } else {
+                    this.editData                   = null;
+                    this.showEdit                   = false;
+                    document.body.style.overflowY   = "scroll";
+                }
             }
         },
         mounted() {
@@ -166,6 +198,10 @@
         color: #BEBEBE;
         font-weight: 400;
         margin-left: 20px;
+    }
+
+    .Profile__header__inner__uploadAmount {
+
     }
 
     .Profile__header__inner__img__container {

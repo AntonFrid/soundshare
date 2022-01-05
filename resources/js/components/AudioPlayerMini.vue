@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <button v-if="!isFavorites && user_id === audioData.user_id" @click="onDelete(audioData.id)" class="AudioPlayerMini__delete">Delete</button>
+        <button v-if="!isFavorites && user_id === audioData.user_id" @click="onEdit(audioData)" class="AudioPlayerMini__edit">Edit</button>
     </div>
 </template>
 
@@ -65,6 +65,7 @@
             'volume',
             'isFavorites',
             'user_id',
+            'onEdit'
         ],
         data() {
             return {
@@ -146,13 +147,6 @@
                         });
                 }
             },
-            onDelete(id) {
-                axios.delete(`/api/file/audio/${id}`)
-                    .then(res => {
-                        this.$emit('update-audioData');
-                        this.$emit('update-userData');
-                    });
-            },
             timeSince(date) {
                 let seconds = Math.floor((new Date() - new Date(date)) / 1000);
 
@@ -206,7 +200,7 @@
         position: relative;
     }
 
-    .AudioPlayerMini__delete {
+    .AudioPlayerMini__edit {
         background-color: transparent;
         border: 2px solid rgba(255, 255, 255, 0.05);
         box-sizing: border-box;
@@ -219,9 +213,9 @@
         font-size: 12px;
     }
 
-    .AudioPlayerMini__delete:hover {
-        border: 2px solid rgba(255, 76, 76, 0.15);
-        color: rgba(255, 76, 76, 0.45);
+    .AudioPlayerMini__edit:hover {
+        border: 2px solid rgba(255, 183, 76, 0.30);
+        color: rgba(255, 183, 76, 0.90);
         cursor: pointer;
     }
 

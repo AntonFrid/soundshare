@@ -1,5 +1,15 @@
 <template>
     <div class="AudioPlayer">
+        <EditModal
+            v-if="showEdit"
+            :audioData="audioData"
+            :showSelf="showEdit"
+            :close-self="onEdit"
+            :isPlayer="true"
+            :authUser="authUser"
+            @update-audioData="getAudioData"
+        />
+
         <div class="AudioPlayer__wrapper">
             <div class="AudioPlayer__waveform__container">
                 <p v-if="loadingBool">Loading...</p>
@@ -22,7 +32,7 @@
                 <svg v-if="playBool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="85px" height="85px"><path d="M8 19c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2v10c0 1.1.9 2 2 2zm6-12v10c0 1.1.9 2 2 2s2-.9 2-2V7c0-1.1-.9-2-2-2s-2 .9-2 2z"/></svg>
             </button>
         </div>
-        <AudioInfo v-bind:authUser="authUser" v-bind:audioData="audioData"/>
+        <AudioInfo v-bind:authUser="authUser" v-bind:audioData="audioData" @on-edit="onEdit"/>
     </div>
 </template>
 
@@ -31,23 +41,26 @@
     import WaveSurfer from "wavesurfer.js";
 
     import AudioInfo from './AudioInfo.vue';
+    import EditModal from "./EditModal";
 
     export default {
         components: {
             AudioInfo,
+            EditModal
         },
         data() {
-          return {
-            playBool: false,
-            audioTime: "00:00",
-            intervalID: null,
-            audioURL: "",
-            wavesurfer: null,
-            audioData: {},
-            favoriteBool: null,
-            totalStreamTime: 0,
-            loadingBool: true,
-          }
+            return {
+                playBool: false,
+                audioTime: "00:00",
+                intervalID: null,
+                audioURL: "",
+                wavesurfer: null,
+                audioData: {},
+                favoriteBool: null,
+                totalStreamTime: 0,
+                loadingBool: true,
+                showEdit: false
+            }
         },
         props: [
             'volume',
@@ -155,6 +168,15 @@
             },
             switchloadingBool() {
                 this.loadingBool = false;
+            },
+            onEdit() {
+                if(!this.showEdit) {
+                    this.showEdit                   = true;
+                    document.body.style.overflowY   = "hidden";
+                } else {
+                    this.showEdit                   = false;
+                    document.body.style.overflowY   = "scroll";
+                }
             }
         },
         watch: {

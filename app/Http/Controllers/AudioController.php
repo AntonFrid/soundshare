@@ -137,4 +137,21 @@ class AudioController extends Controller
 
         return response(204);
     }
+
+    public function editAudioFile(Request $request, $id)
+    {
+        $title          = $request->title;
+        $description    = $request->description ? $request->description : 'No description given.';
+        $private        = $request->private;
+        $download       = $request->download;
+
+        $audio = Audio::find($id);
+        $audio->title       = $title;
+        $audio->description = $description;
+        $audio->private     = ($private == 'true' || $private == 1) ? 1 : 0;
+        $audio->download    = ($download == 'true' || $download == 1) ? 1 : 0;
+        $audio->save();
+
+        return response($audio);
+    }
 }
